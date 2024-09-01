@@ -13,10 +13,10 @@ def time_series_dataset(
 
 	for i in range(len(series) - window_size):
 
-		inputs.append(series[i:i + window_size])
-		outputs.append(series[i + window_size])
+		inputs.append(series[i:i + window_size][..., None])
+		outputs.append(series[i + window_size][..., None])
 
-	return torch.vstack(inputs)[..., None], torch.vstack(outputs)
+	return inputs, outputs
 
 
 
@@ -29,8 +29,8 @@ def train_model(
 	device: str | torch.device
 ) -> None:
 	
-	inputs = inputs.to(device)
-	outputs = outputs.to(device)
+	inputs = inputs
+	outputs = outputs
 	optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 	loss_fn = torch.nn.MSELoss()
 
@@ -41,6 +41,9 @@ def train_model(
 		epoch_loss = 0.
 
 		for input, output in zip(inputs, outputs):
+
+			input = input.to(device)
+			output = output.to(device)
 
 			optimizer.zero_grad()
 			prediction: torch.Tensor = model(input)[0][-1]
