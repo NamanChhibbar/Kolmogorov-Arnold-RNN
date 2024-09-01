@@ -29,8 +29,6 @@ def train_model(
 	device: str | torch.device
 ) -> None:
 	
-	inputs = inputs
-	outputs = outputs
 	optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 	loss_fn = torch.nn.MSELoss()
 
@@ -52,4 +50,4 @@ def train_model(
 			optimizer.step()
 			epoch_loss += loss.item()
 		
-		print(f"Epoch {epoch + 1} Loss: {epoch_loss / batches}")
+		print(f"Epoch [{epoch + 1}/{epochs}] Loss [{epoch_loss / batches}]")
