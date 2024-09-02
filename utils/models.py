@@ -44,7 +44,7 @@ class KARNNLayer(nn.Module):
 	def forward(
 		self,
 		x: torch.Tensor
-	) -> tuple[torch.Tensor | None, torch.Tensor]:
+	) -> tuple[torch.Tensor, torch.Tensor]:
 		
 		hidden = self.init_hidden_state.clone().to(self.device)
 		hidden_states = []
