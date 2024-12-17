@@ -1,3 +1,5 @@
+from itertools import batched
+
 import torch
 import torch.nn as nn
 from kan.KANLayer import KANLayer
@@ -101,18 +103,20 @@ def train_model(
   model.to(device)
   loss_history = []
 
+  inds = torch.tensor(range(len(inputs)))
+
   for epoch in range(epochs):
 
     epoch_loss = .0
 
-    for input, output in zip(inputs, outputs):
+    for batch_ind in batched(inds, batch_size):
 
-      input = input.to(device)
-      output = output.to(device)
+      inp = inputs[batch_ind].to(device)
+      out = outputs[batch_ind].to(device)
 
       optimizer.zero_grad()
-      prediction: torch.Tensor = model(input)[0][-1]
-      loss: torch.Tensor = loss_fn(prediction, output)
+      prediction: torch.Tensor = model(inp)[0][-1]
+      loss: torch.Tensor = loss_fn(prediction, out)
       loss.backward()
       optimizer.step()
       epoch_loss += loss.item()
