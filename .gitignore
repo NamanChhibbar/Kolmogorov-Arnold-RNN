@@ -1,7 +1,6 @@
 temp*
 .venv
 .env
-*.pdf
 
 .DS_Store
 __pycache__/
