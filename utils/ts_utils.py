@@ -24,9 +24,9 @@ def load_time_series(
   # Check the extension of the file
   _, extension = os.path.splitext(data_path)
   match extension:
-      case '.csv': data = pd.read_csv(data_path, parse_dates=[date_column])
-      case '.xlsx': data = pd.read_excel(data_path, parse_dates=[date_column])
-  
+    case '.csv': data = pd.read_csv(data_path, parse_dates=[date_column])
+    case '.xlsx': data = pd.read_excel(data_path, parse_dates=[date_column])
+
   # Parse date
   data[date_column] = pd.to_datetime(data[date_column].dt.date)
 
