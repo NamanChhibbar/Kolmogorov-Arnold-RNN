@@ -7,13 +7,13 @@ import torch
 def load_time_series(
   data_path: str,
   date_column: str,
-  columns: list[str]
+  columns: list[str] | None = None
 ) -> pd.DataFrame:
   '''
   Loads time series from a csv or excel file.
 
   ## Parameters
-  `data_path`: Path to data file
+  `data_path`: Path to csv or excel file
   `date_column`: Column to parse date indices
   `columns`: Columns to be imported
 
@@ -23,18 +23,22 @@ def load_time_series(
 
   # Check the extension of the file
   _, extension = os.path.splitext(data_path)
+
+  # Load data
   match extension:
-    case '.csv': data = pd.read_csv(data_path, parse_dates=[date_column])
-    case '.xlsx': data = pd.read_excel(data_path, parse_dates=[date_column])
+    case '.csv':
+      data = pd.read_csv(data_path, index_col=date_column, parse_dates=True)
+    case '.xlsx':
+      data = pd.read_excel(data_path, index_col=date_column, parse_dates=True)
+    case _:
+      raise ValueError('Invalid file extension')
 
-  # Parse date
-  data[date_column] = pd.to_datetime(data[date_column].dt.date)
+  # Select columns
+  if columns:
+    data = data[columns]
 
-  # Set date as index
-  data.index = data[date_column]
-
-  # Sample by day
-  data = data.resample('d')[*columns].sum()
+  # Drop missing values
+  data.dropna(inplace=True)
 
   return data
 
