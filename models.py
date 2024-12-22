@@ -28,7 +28,7 @@ class KARNN(nn.Module):
 
     self.layers = nn.ModuleList([
       KARNNLayer(
-        in_dim=in_dim if i == 0 else out_dim,
+        in_dim=in_dim if i==0 else out_dim,
         out_dim=out_dim,
         hidden_dim=hidden_dim,
         num_intervals=num_intervals,
