@@ -16,7 +16,9 @@ class KARNNLayer(nn.Module):
     degree: int = 3,
     device: str | torch.device = 'cpu'
   ) -> None:
-
+    '''
+    Initializes a KARNN layer.
+    '''
     super().__init__()
     self.in_dim = in_dim
     self.out_dim = out_dim
@@ -24,7 +26,6 @@ class KARNNLayer(nn.Module):
     self.num_intervals = num_intervals
     self.degree = degree
     self.device = device
-
     self.init_hidden_state = torch.zeros(hidden_dim, device=device)
     self.hidden_update_layer = KANLayer(
       in_dim=in_dim+hidden_dim,
@@ -46,29 +47,25 @@ class KARNNLayer(nn.Module):
     self,
     x: torch.Tensor
   ) -> tuple[torch.Tensor, torch.Tensor]:
-    
     hidden = self.init_hidden_state.clone().to(self.device)
     hidden_states = []
-
     for x_t in x:
-
       # Update hidden state
       hidden_input = torch.cat([x_t, hidden])[None, :]
       hidden = self.hidden_update_layer(hidden_input)[0][0]
       hidden_states.append(hidden)
-
     hidden_states = torch.vstack(hidden_states)
-
     # Get outputs if this is the output layer
     outputs = self.output_layer(hidden_states)[0]
-
     return outputs, hidden_states
-  
+
   def to(
     self,
     device: str | torch.device
   ) -> 'KARNNLayer':
-    
+    '''
+    Moves the model to the specified device.
+    '''
     super().to(device)
     self.device = device
     return self
@@ -86,7 +83,10 @@ def train_model(
   threshold: float = 1e-4,
   device: str | torch.device = 'cpu'
 ) -> list[float]:
-  
+  '''
+  Trains a model with MSE loss, AdamW optimizer, and ReduceLROnPlateau scheduler.
+  '''
+  # Initialize loss function, optimizer, and scheduler
   loss_fn = torch.nn.MSELoss()
   optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
   scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -95,38 +95,32 @@ def train_model(
     patience=patience,
     threshold=threshold
   )
-
+  # Number of batches
   batches = len(inputs) / batch_size
-
+  # Set model for training
   model.train()
   model.to(device)
   loss_history = []
-
+  # Indices for batching
   inds = torch.tensor(range(len(inputs)))
-
+  # Training loop
   for epoch in range(epochs):
-
     epoch_loss = .0
-
+    # Batch indices
     for batch_ind in batched(inds, batch_size):
-
       inp = inputs[batch_ind].to(device)
       out = outputs[batch_ind].to(device)
-
       optimizer.zero_grad()
       prediction: torch.Tensor = model(inp)[0][-1]
       loss: torch.Tensor = loss_fn(prediction, out)
       loss.backward()
       optimizer.step()
       epoch_loss += loss.item()
-    
     avg_loss = epoch_loss / batches
     loss_history.append(avg_loss)
-
     scheduler.step(avg_loss)
-
     print(f'Epoch [{epoch + 1}/{epochs}] Loss [{avg_loss}]')
-
+  # Set model for evaluation
   model.eval()
   model.to('cpu')
   return loss_history
