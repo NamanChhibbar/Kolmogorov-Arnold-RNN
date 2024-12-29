@@ -52,7 +52,7 @@ class KARNN(nn.Module):
     self,
     device: str | torch.device
   ) -> 'KARNN':
-    
+
     super().to(device)
     for layer in self.layers:
       layer.to(device)
