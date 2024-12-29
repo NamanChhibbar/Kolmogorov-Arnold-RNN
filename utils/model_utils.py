@@ -74,7 +74,6 @@ class KARNNLayer(nn.Module):
     return self
 
 
-
 def train_model(
   model: nn.Module,
   inputs: torch.Tensor,
